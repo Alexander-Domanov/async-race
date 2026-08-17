@@ -3,3 +3,5 @@ export interface Car {
     name: string;
     color: string;
 }
+
+export type Page = 'garage' | 'winners';
