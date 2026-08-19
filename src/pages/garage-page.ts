@@ -1,4 +1,5 @@
 import {garageState, loadGarage} from "../state/garage-state.ts";
+import {createCarCard} from "../components/car-card.ts";
 
 const renderGarage = (): HTMLElement => {
     const container = document.createElement('div');
@@ -7,17 +8,28 @@ const renderGarage = (): HTMLElement => {
 
     info.textContent = `Page ${garageState.currentPage}, Total Cars: ${garageState.totalCount}`;
 
-    container.append(info);
+    const list = document.createElement('div');
+
+    list.classList.add(
+        'garage-list',
+        'flex',
+        'flex-col',
+        'gap-4',
+    );
 
     for (const car of garageState.cars) {
-        const item = document.createElement('p');
-
-        item.textContent = car.name;
-        container.append(item);
+        list.append(
+            createCarCard(car),
+        );
     }
 
+    container.append(
+        info,
+        list,
+    );
+
     return container;
-}
+};
 
 const initializePage = async (page: HTMLElement): Promise<void> => {
     try {

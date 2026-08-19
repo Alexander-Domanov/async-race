@@ -4,8 +4,8 @@ import type {Page} from "../types/types.ts";
 export const createNavigation = (onNavigate: (page: Page) => void): HTMLElement => {
     const nav = document.createElement('nav');
 
-    const garageButton = createButton('Garage');
-    const winnersButton = createButton('Winners');
+    const garageButton = createButton({text: 'Garage'});
+    const winnersButton = createButton({text: 'Winners'});
     
     garageButton.addEventListener('click', () => {
         onNavigate('garage');

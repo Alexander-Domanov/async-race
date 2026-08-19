@@ -1,7 +1,20 @@
-export const createButton = (text: string): HTMLButtonElement => {
+interface ButtonProperties {
+    text: string;
+    disabled?: boolean;
+    type?: 'button' | 'submit';
+}
+
+export const createButton = (
+    {
+        text,
+        disabled = false,
+        type = 'button',
+    }:ButtonProperties): HTMLButtonElement => {
     const button = document.createElement('button');
 
     button.textContent = text;
+    button.type = type;
+    button.disabled = disabled;
     button.classList.add(
         'px-4',
         'py-2',
