@@ -128,8 +128,6 @@ const createRaceLane = (
         'car-card__finish',
     );
 
-    finish.textContent = '🏁';
-
     lane.append(
         vehicle,
         finish,

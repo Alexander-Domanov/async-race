@@ -6,6 +6,8 @@ const renderGarage = (): HTMLElement => {
 
     const info = document.createElement('p');
 
+    info.classList.add('text-slate-400');
+
     info.textContent = `Page ${garageState.currentPage}, Total Cars: ${garageState.totalCount}`;
 
     const list = document.createElement('div');

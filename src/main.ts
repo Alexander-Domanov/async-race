@@ -15,10 +15,10 @@ const handleNavigate = (page: Page): void => {
     initRouter(viewContainer, page);
 };
 
-const navigation = createNavigation(handleNavigate);
+const navigation = createNavigation(handleNavigate, 'garage');
 
 app.innerHTML = `
-  <h1 class="text-4xl font-bold text-blue-500">
+  <h1 class="text-4xl font-bold text-slate-100">
     Async Race
   </h1>
 `;
