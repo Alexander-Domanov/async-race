@@ -1,15 +1,9 @@
 import {garageState, loadGarage} from "../state/garage-state.ts";
 import {createCarCard} from "../components/car-card.ts";
+import {createPagination} from "../components/pagination.ts";
+import {GARAGE_LIMIT} from "../constants.ts";
 
-const renderGarage = (): HTMLElement => {
-    const container = document.createElement('div');
-
-    const info = document.createElement('p');
-
-    info.classList.add('text-slate-400');
-
-    info.textContent = `Page ${garageState.currentPage}, Total Cars: ${garageState.totalCount}`;
-
+const createCarList = (): HTMLElement => {
     const list = document.createElement('div');
 
     list.classList.add(
@@ -25,27 +19,38 @@ const renderGarage = (): HTMLElement => {
         );
     }
 
+    return list;
+};
+
+const renderGarage = (onPageChange: (page: number) => void): HTMLElement => {
+    const container = document.createElement('div');
+
+    const heading = document.createElement('h2');
+
+    heading.textContent = 'Garage Page';
+
+    const info = document.createElement('p');
+
+    info.classList.add('text-slate-400');
+
+    info.textContent = `Page ${garageState.currentPage}, Total Cars: ${garageState.totalCount}`;
+
+    const totalPages = Math.max(1, Math.ceil(garageState.totalCount / GARAGE_LIMIT));
+
+    const pagination = createPagination({
+        currentPage: garageState.currentPage,
+        totalPages,
+        onPageChange,
+    });
+
     container.append(
+        heading,
         info,
-        list,
+        createCarList(),
+        pagination,
     );
 
     return container;
-};
-
-const initializePage = async (page: HTMLElement): Promise<void> => {
-    try {
-        await loadGarage();
-
-        page.textContent = 'Garage Page';
-
-        page.append(renderGarage());
-    } catch (error: unknown) {
-
-        page.textContent = error instanceof Error
-            ? error.message
-            : "Unknown error";
-    }
 };
 
 export const createGaragePage = (): HTMLElement => {
@@ -53,7 +58,22 @@ export const createGaragePage = (): HTMLElement => {
 
     page.textContent = 'Loading Garage...';
 
-    void initializePage(page);
-    
+    const loadPage = async (): Promise<void> => {
+        try {
+            await loadGarage();
+
+            page.replaceChildren(renderGarage((nextPage: number) => {
+                garageState.currentPage = nextPage;
+                void loadPage();
+            }));
+        } catch (error: unknown) {
+            page.textContent = error instanceof Error
+                ? error.message
+                : "Unknown error";
+        }
+    };
+
+    void loadPage();
+
     return page;
 };
