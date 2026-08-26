@@ -1,6 +1,6 @@
 import type {Car} from "../types/types.ts";
 
-const isCar = (value: unknown): value is Car => {
+export const isCar = (value: unknown): value is Car => {
     if (typeof value !== "object" || value === null) {
         return false;
     }
