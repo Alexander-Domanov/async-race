@@ -1,7 +1,7 @@
 export const createWinnersPage = (): HTMLElement => {
-    const page = document.createElement('main');
+    const page = document.createElement("main");
 
-    page.textContent = 'Winners Page';
-    
+    page.textContent = "Winners Page";
+
     return page;
 };

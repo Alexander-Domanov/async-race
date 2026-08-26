@@ -12,9 +12,9 @@ export const isCar = (value: unknown): value is Car => {
         typeof value.name === "string" &&
         "color" in value &&
         typeof value.color === "string"
-    )
-}
+    );
+};
 
 export const isCarArray = (value: unknown): value is Car[] => {
     return Array.isArray(value) && value.every(isCar);
-}
+};

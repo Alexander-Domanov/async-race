@@ -6,11 +6,11 @@ export const initRouter = (viewContainer: HTMLElement, page: Page): void => {
     viewContainer.replaceChildren();
 
     switch (page) {
-        case 'garage': {
+        case "garage": {
             viewContainer.append(createGaragePage());
             break;
         }
-        case 'winners': {
+        case "winners": {
             viewContainer.append(createWinnersPage());
             break;
         }

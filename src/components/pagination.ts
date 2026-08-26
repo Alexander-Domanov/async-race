@@ -7,29 +7,29 @@ interface PaginationProperties {
 }
 
 export const createPagination = ({
-                                     currentPage,
-                                     totalPages,
-                                     onPageChange,
-                                 }: PaginationProperties): HTMLElement => {
-    const pagination = document.createElement('div');
+    currentPage,
+    totalPages,
+    onPageChange,
+}: PaginationProperties): HTMLElement => {
+    const pagination = document.createElement("div");
 
-    pagination.classList.add('pagination', 'flex', 'items-center', 'gap-2');
+    pagination.classList.add("pagination", "flex", "items-center", "gap-2");
 
     const previousButton = createButton({
-        text: 'Previous',
+        text: "Previous",
         disabled: currentPage <= 1,
     });
 
     const nextButton = createButton({
-        text: 'Next',
+        text: "Next",
         disabled: currentPage >= totalPages,
     });
 
-    previousButton.addEventListener('click', () => {
+    previousButton.addEventListener("click", () => {
         onPageChange(currentPage - 1);
     });
 
-    nextButton.addEventListener('click', () => {
+    nextButton.addEventListener("click", () => {
         onPageChange(currentPage + 1);
     });
 

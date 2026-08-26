@@ -5,8 +5,11 @@ export const garageState: GarageState = {
     cars: [],
     currentPage: 1,
     totalCount: 0,
-    createName: '',
-    createColor: '#ffffff',
+    createName: "",
+    createColor: "#ffffff",
+    selectedCarId: null,
+    updateName: "",
+    updateColor: "#ffffff",
 };
 
 export const loadGarage = async (): Promise<void> => {

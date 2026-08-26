@@ -15,11 +15,14 @@ export interface GarageResponse {
 }
 
 export interface GarageState {
-    cars: Car[],
+    cars: Car[];
     totalCount: number;
     currentPage: number;
     createName: string;
     createColor: string;
+    selectedCarId: number | null;
+    updateName: string;
+    updateColor: string;
 }
 
-export type Page = 'garage' | 'winners';
+export type Page = "garage" | "winners";

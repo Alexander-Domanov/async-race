@@ -1,4 +1,4 @@
-const apiUrl:unknown = import.meta.env["VITE_API_URL"];
+const apiUrl: unknown = import.meta.env["VITE_API_URL"];
 
 if (typeof apiUrl !== "string" || apiUrl.length === 0) {
     throw new Error("VITE_API_URL is not defined");
@@ -7,3 +7,5 @@ if (typeof apiUrl !== "string" || apiUrl.length === 0) {
 export const API_URL = apiUrl;
 
 export const GARAGE_LIMIT = 7;
+
+export const HTTP_NOT_FOUND = 404;

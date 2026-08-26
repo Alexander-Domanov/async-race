@@ -1,5 +1,5 @@
 // eslint-disable-next-line unicorn/prefer-https
-const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
 const setAttributes = (
     element: Element,
@@ -15,7 +15,7 @@ const createCircle = (
 ): SVGCircleElement => {
     const circle = document.createElementNS(
         SVG_NAMESPACE,
-        'circle',
+        "circle",
     );
 
     setAttributes(circle, attributes);
@@ -26,15 +26,15 @@ const createCircle = (
 const createShadow = (): SVGEllipseElement => {
     const shadow = document.createElementNS(
         SVG_NAMESPACE,
-        'ellipse',
+        "ellipse",
     );
 
     setAttributes(shadow, {
-        cx: '125',
-        cy: '85',
-        rx: '90',
-        ry: '8',
-        fill: 'rgba(0,0,0,0.3)',
+        cx: "125",
+        cy: "85",
+        rx: "90",
+        ry: "8",
+        fill: "rgba(0,0,0,0.3)",
     });
 
     return shadow;
@@ -45,7 +45,7 @@ const createBody = (
 ): SVGPathElement => {
     const body = document.createElementNS(
         SVG_NAMESPACE,
-        'path',
+        "path",
     );
 
     setAttributes(body, {
@@ -67,7 +67,7 @@ const createBody = (
 const createCabin = (): SVGPathElement => {
     const cabin = document.createElementNS(
         SVG_NAMESPACE,
-        'path',
+        "path",
     );
 
     setAttributes(cabin, {
@@ -78,7 +78,7 @@ const createCabin = (): SVGPathElement => {
             L170 40
             Z
         `,
-        fill: '#64748b',
+        fill: "#64748b",
     });
 
     return cabin;
@@ -87,7 +87,7 @@ const createCabin = (): SVGPathElement => {
 const createWindows = (): SVGPathElement => {
     const windows = document.createElementNS(
         SVG_NAMESPACE,
-        'path',
+        "path",
     );
 
     setAttributes(windows, {
@@ -98,7 +98,7 @@ const createWindows = (): SVGPathElement => {
             L100 38
             Z
         `,
-        fill: '#1e293b',
+        fill: "#1e293b",
     });
 
     return windows;
@@ -107,21 +107,21 @@ const createWindows = (): SVGPathElement => {
 const createLights = (): SVGGElement => {
     const lights = document.createElementNS(
         SVG_NAMESPACE,
-        'g',
+        "g",
     );
 
     const frontLight = createCircle({
-        cx: '182',
-        cy: '52',
-        r: '5',
-        fill: '#fde047',
+        cx: "182",
+        cy: "52",
+        r: "5",
+        fill: "#fde047",
     });
 
     const rearLight = createCircle({
-        cx: '40',
-        cy: '52',
-        r: '4',
-        fill: '#ef4444',
+        cx: "40",
+        cy: "52",
+        r: "4",
+        fill: "#ef4444",
     });
 
     lights.append(frontLight, rearLight);
@@ -135,23 +135,23 @@ const createWheel = (
 ): SVGGElement => {
     const wheel = document.createElementNS(
         SVG_NAMESPACE,
-        'g',
+        "g",
     );
 
-    wheel.classList.add('car-image__wheel');
+    wheel.classList.add("car-image__wheel");
 
     const tire = createCircle({
         cx: String(cx),
         cy: String(cy),
-        r: '15',
-        fill: '#111827',
+        r: "15",
+        fill: "#111827",
     });
 
     const rim = createCircle({
         cx: String(cx),
         cy: String(cy),
-        r: '6',
-        fill: '#94a3b8',
+        r: "6",
+        fill: "#94a3b8",
     });
 
     wheel.append(tire, rim);
@@ -162,16 +162,16 @@ const createWheel = (
 const createDetailLine = (): SVGLineElement => {
     const detailLine = document.createElementNS(
         SVG_NAMESPACE,
-        'line',
+        "line",
     );
 
     setAttributes(detailLine, {
-        x1: '55',
-        y1: '55',
-        x2: '170',
-        y2: '55',
-        stroke: '#cbd5e1',
-        'stroke-width': '2',
+        x1: "55",
+        y1: "55",
+        x2: "170",
+        y2: "55",
+        stroke: "#cbd5e1",
+        "stroke-width": "2",
     });
 
     return detailLine;
@@ -207,21 +207,21 @@ export const createCarImage = (
 ): SVGSVGElement => {
     const svg = document.createElementNS(
         SVG_NAMESPACE,
-        'svg',
+        "svg",
     );
 
     setAttributes(svg, {
-        viewBox: '0 0 250 100',
-        preserveAspectRatio: 'xMidYMid meet',
-        'aria-hidden': 'true',
+        viewBox: "0 0 250 100",
+        preserveAspectRatio: "xMidYMid meet",
+        "aria-hidden": "true",
     });
 
     svg.classList.add(
-        'car-image',
-        'w-full',
-        'max-w-[250px]',
-        'h-auto',
-        'block',
+        "car-image",
+        "w-full",
+        "max-w-[250px]",
+        "h-auto",
+        "block",
     );
 
     appendCarParts(svg, color);
