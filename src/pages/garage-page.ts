@@ -8,19 +8,29 @@ import {
     applyDeleteCar,
     applyGenerateCars,
     applyUpdateCar,
+    driveCarEngine,
     garageState,
     loadGarage,
+    markEngineFinished,
     selectCar,
+    startCarEngine,
+    stopCarEngine,
 } from "../state/garage-state.ts";
-import type {Car} from "../types/types.ts";
+import type {Car, EngineCarState} from "../types/types.ts";
+import {animateCar} from "../utils/animation.ts";
+
+const runningAnimations = new Map<number, () => void>();
 
 interface GarageRenderProperties {
+    engineState: Record<number, EngineCarState>;
     onCreate: (name: string, color: string) => void;
     onGenerate: () => void;
     onPageChange: (page: number) => void;
     onSelect: (car: Car) => void;
     onRemove: (car: Car) => void;
     onUpdate: (name: string, color: string) => void;
+    onStart: (car: Car, lane: HTMLElement, vehicle: HTMLElement) => void;
+    onStop: (car: Car, vehicle: HTMLElement) => void;
 }
 
 const createCreateForm = (onCreate: (name: string, color: string) => void): HTMLFormElement => {
@@ -79,12 +89,15 @@ const createGarageInfo = (): HTMLElement => {
 };
 
 const renderGarage = ({
+    engineState,
     onCreate,
     onGenerate,
     onPageChange,
     onSelect,
     onRemove,
     onUpdate,
+    onStart,
+    onStop,
 }: GarageRenderProperties): HTMLElement => {
     const container = document.createElement("div");
 
@@ -103,8 +116,11 @@ const renderGarage = ({
         createCarList({
             cars: garageState.cars,
             selectedCarId: garageState.selectedCarId,
+            engineState,
             onSelect,
             onRemove,
+            onStart,
+            onStop,
         }),
         createPagination({
             currentPage: garageState.currentPage,
@@ -131,8 +147,53 @@ const runAction = async (page: HTMLElement, action: () => Promise<void>): Promis
     }
 };
 
+const runCarStart = async (
+    page: HTMLElement,
+    car: Car,
+    lane: HTMLElement,
+    vehicle: HTMLElement,
+): Promise<void> => {
+    try {
+        const engine = await startCarEngine(car.id);
+        const durationMs = engine.distance / engine.velocity;
+        const cancelAnimation = animateCar(lane, vehicle, durationMs, () => {
+            runningAnimations.delete(car.id);
+            markEngineFinished(car.id);
+        });
+
+        runningAnimations.set(car.id, cancelAnimation);
+
+        const isDriving = await driveCarEngine(car.id);
+
+        if (!isDriving) {
+            cancelAnimation();
+            runningAnimations.delete(car.id);
+        }
+    } catch {
+        renderGaragePage(page);
+    }
+};
+
+const runCarStop = async (
+    page: HTMLElement,
+    car: Car,
+    vehicle: HTMLElement,
+): Promise<void> => {
+    try {
+        runningAnimations.get(car.id)?.();
+        runningAnimations.delete(car.id);
+
+        await stopCarEngine(car.id);
+
+        vehicle.style.transform = "";
+    } catch {
+        renderGaragePage(page);
+    }
+};
+
 const renderGaragePage = (page: HTMLElement): void => {
     page.replaceChildren(renderGarage({
+        engineState: garageState.engineState,
         onCreate: (name, color) => {
             void runAction(page, () => applyCreateCar(name, color));
         },
@@ -152,6 +213,12 @@ const renderGaragePage = (page: HTMLElement): void => {
         },
         onUpdate: (name, color) => {
             void runAction(page, () => applyUpdateCar(name, color));
+        },
+        onStart: (car, lane, vehicle) => {
+            void runCarStart(page, car, lane, vehicle);
+        },
+        onStop: (car, vehicle) => {
+            void runCarStop(page, car, vehicle);
         },
     }));
 };

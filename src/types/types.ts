@@ -14,6 +14,21 @@ export interface GarageResponse {
     totalCount: number;
 }
 
+export interface EngineResponse {
+    velocity: number;
+    distance: number;
+}
+
+export interface DriveResponse {
+    success: boolean;
+}
+
+export type DriveResult =
+    | {status: "success"}
+    | {status: "failed"};
+
+export type EngineCarState = "idle" | "driving" | "finished" | "broken";
+
 export interface GarageState {
     cars: Car[];
     totalCount: number;
@@ -21,6 +36,7 @@ export interface GarageState {
     createName: string;
     createColor: string;
     selectedCarId: number | null;
+    engineState: Record<number, EngineCarState>;
     updateName: string;
     updateColor: string;
 }

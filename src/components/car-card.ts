@@ -1,12 +1,15 @@
-import type {Car} from "../types/types.ts";
+import type {Car, EngineCarState} from "../types/types.ts";
 import {createButton} from "./button.ts";
 import {createCarImage} from "./car-image.ts";
 
 interface CarCardProperties {
     car: Car;
     isSelected: boolean;
+    engineState: EngineCarState;
     onSelect: (car: Car) => void;
     onRemove: (car: Car) => void;
+    onStart: (car: Car, lane: HTMLElement, vehicle: HTMLElement) => void;
+    onStop: (car: Car, vehicle: HTMLElement) => void;
 }
 
 const createManagementControls = (
@@ -42,7 +45,14 @@ const createManagementControls = (
     return controls;
 };
 
-const createEngineControls = (): HTMLDivElement => {
+const createEngineControls = (
+    car: Car,
+    engineState: EngineCarState,
+    lane: HTMLElement,
+    vehicle: HTMLElement,
+    onStart: (car: Car, lane: HTMLElement, vehicle: HTMLElement) => void,
+    onStop: (car: Car, vehicle: HTMLElement) => void,
+): HTMLDivElement => {
     const engine = document.createElement("div");
 
     engine.classList.add(
@@ -54,15 +64,27 @@ const createEngineControls = (): HTMLDivElement => {
 
     const startButton = createButton({
         text: "Start",
-        disabled: true,
+        disabled: engineState !== "idle",
     });
     const stopButton = createButton({
         text: "Stop",
-        disabled: true,
+        disabled: engineState === "idle",
     });
 
     startButton.classList.add("car-card__start");
     stopButton.classList.add("car-card__stop");
+
+    startButton.addEventListener("click", () => {
+        startButton.disabled = true;
+        stopButton.disabled = false;
+        onStart(car, lane, vehicle);
+    });
+
+    stopButton.addEventListener("click", () => {
+        stopButton.disabled = true;
+        startButton.disabled = false;
+        onStop(car, vehicle);
+    });
 
     engine.append(startButton, stopButton);
 
@@ -104,7 +126,7 @@ const createHeader = (
     return header;
 };
 
-const createRaceLane = (color: string): HTMLDivElement => {
+const createRaceLane = (color: string): {lane: HTMLDivElement; vehicle: HTMLDivElement} => {
     const lane = document.createElement("div");
 
     lane.classList.add(
@@ -128,10 +150,15 @@ const createRaceLane = (color: string): HTMLDivElement => {
 
     lane.append(vehicle, finish);
 
-    return lane;
+    return {lane, vehicle};
 };
 
-const createRaceRow = (color: string): HTMLDivElement => {
+const createRaceRow = (
+    car: Car,
+    engineState: EngineCarState,
+    onStart: (car: Car, lane: HTMLElement, vehicle: HTMLElement) => void,
+    onStop: (car: Car, vehicle: HTMLElement) => void,
+): HTMLDivElement => {
     const row = document.createElement("div");
 
     row.classList.add(
@@ -141,8 +168,8 @@ const createRaceRow = (color: string): HTMLDivElement => {
         "gap-4",
     );
 
-    const engineControls = createEngineControls();
-    const lane = createRaceLane(color);
+    const {lane, vehicle} = createRaceLane(car.color);
+    const engineControls = createEngineControls(car, engineState, lane, vehicle, onStart, onStop);
 
     row.append(engineControls, lane);
 
@@ -152,8 +179,11 @@ const createRaceRow = (color: string): HTMLDivElement => {
 export const createCarCard = ({
     car,
     isSelected,
+    engineState,
     onSelect,
     onRemove,
+    onStart,
+    onStop,
 }: CarCardProperties): HTMLElement => {
     const card = document.createElement("article");
 
@@ -172,7 +202,7 @@ export const createCarCard = ({
     }
 
     const header = createHeader(car, onSelect, onRemove);
-    const raceRow = createRaceRow(car.color);
+    const raceRow = createRaceRow(car, engineState, onStart, onStop);
 
     card.append(header, raceRow);
 
