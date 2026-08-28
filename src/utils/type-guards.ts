@@ -1,4 +1,4 @@
-import type {Car, DriveResponse, EngineResponse} from "../types/types.ts";
+import type {Car, DriveResponse, EngineResponse, Winner} from "../types/types.ts";
 
 export const isCar = (value: unknown): value is Car => {
     if (typeof value !== "object" || value === null) {
@@ -38,4 +38,23 @@ export const isDriveResponse = (value: unknown): value is DriveResponse => {
     }
 
     return "success" in value && typeof value.success === "boolean";
+};
+
+export const isWinner = (value: unknown): value is Winner => {
+    if (typeof value !== "object" || value === null) {
+        return false;
+    }
+
+    return (
+        "id" in value &&
+        typeof value.id === "number" &&
+        "wins" in value &&
+        typeof value.wins === "number" &&
+        "time" in value &&
+        typeof value.time === "number"
+    );
+};
+
+export const isWinnerArray = (value: unknown): value is Winner[] => {
+    return Array.isArray(value) && value.every(isWinner);
 };

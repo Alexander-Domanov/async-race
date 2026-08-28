@@ -1,22 +1,7 @@
-import {API_URL, GARAGE_LIMIT} from "../constants.ts";
+import {API_URL, GARAGE_LIMIT, HTTP_NOT_FOUND} from "../constants.ts";
 import type {Car, CarPayload, GarageResponse} from "../types/types.ts";
+import {getTotalCount} from "../utils/api-helpers.ts";
 import {isCar, isCarArray} from "../utils/type-guards.ts";
-
-const getTotalCount = (response: Response): number => {
-    const header = response.headers.get("X-Total-Count");
-
-    if (header === null) {
-        throw new Error("Missing X-Total-Count");
-    }
-
-    const totalCount = Number(header);
-
-    if (!Number.isInteger(totalCount) || totalCount < 0) {
-        throw new Error("Invalid X-Total-Count");
-    }
-
-    return totalCount;
-};
 
 export const getCars = async (page: number): Promise<GarageResponse> => {
     const url = new URL("/garage", API_URL);
@@ -40,6 +25,28 @@ export const getCars = async (page: number): Promise<GarageResponse> => {
         cars: data,
         totalCount: getTotalCount(response),
     };
+};
+
+export const getCar = async (id: number): Promise<Car | null> => {
+    const url = new URL(`/garage/${id}`, API_URL);
+
+    const response = await fetch(url);
+
+    if (response.status === HTTP_NOT_FOUND) {
+        return null;
+    }
+
+    if (!response.ok) {
+        throw new Error(`Get car request failed: ${response.status}`);
+    }
+
+    const data: unknown = await response.json();
+
+    if (!isCar(data)) {
+        throw new Error("Invalid car response format");
+    }
+
+    return data;
 };
 
 export const createCar = async (payload: CarPayload): Promise<Car> => {

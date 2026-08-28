@@ -108,7 +108,10 @@ export const driveCarEngine = async (carId: number): Promise<boolean> => {
     const result = await driveEngine(carId);
 
     if (result.status === "failed") {
-        garageState.engineState[carId] = "broken";
+        if (garageState.engineState[carId] === "driving") {
+            garageState.engineState[carId] = "broken";
+        }
+
         return false;
     }
 

@@ -29,6 +29,40 @@ export type DriveResult =
 
 export type EngineCarState = "idle" | "driving" | "finished" | "broken";
 
+export interface Winner {
+    id: number;
+    wins: number;
+    time: number;
+}
+
+export interface CreateWinnerPayload {
+    id: number;
+    wins: number;
+    time: number;
+}
+
+export interface WinnerPayload {
+    wins: number;
+    time: number;
+}
+
+export type WinnersSortField = "id" | "wins" | "time";
+
+export type WinnersSortOrder = "ASC" | "DESC";
+
+export interface WinnersResponse {
+    winners: Winner[];
+    totalCount: number;
+}
+
+export interface WinnersState {
+    winners: Winner[];
+    totalCount: number;
+    currentPage: number;
+    sortField: WinnersSortField;
+    sortOrder: WinnersSortOrder;
+}
+
 export interface GarageState {
     cars: Car[];
     totalCount: number;

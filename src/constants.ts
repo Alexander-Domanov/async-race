@@ -8,9 +8,13 @@ export const API_URL = apiUrl;
 
 export const GARAGE_LIMIT = 7;
 
+export const WINNERS_LIMIT = 10;
+
 export const HTTP_NOT_FOUND = 404;
 
 export const HTTP_INTERNAL_SERVER_ERROR = 500;
+
+export const MILLISECONDS_PER_SECOND = 1000;
 
 export const GENERATE_COUNT = 100;
 

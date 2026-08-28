@@ -2,7 +2,7 @@ import {createButton} from "../components/button.ts";
 import {createCarForm} from "../components/car-form.ts";
 import {createCarList} from "../components/car-list.ts";
 import {createPagination} from "../components/pagination.ts";
-import {GARAGE_LIMIT} from "../constants.ts";
+import {GARAGE_LIMIT, MILLISECONDS_PER_SECOND} from "../constants.ts";
 import {
     applyCreateCar,
     applyDeleteCar,
@@ -10,16 +10,24 @@ import {
     applyUpdateCar,
     driveCarEngine,
     garageState,
+    getEngineState,
     loadGarage,
     markEngineFinished,
     selectCar,
     startCarEngine,
     stopCarEngine,
 } from "../state/garage-state.ts";
+import {saveWinner} from "../state/winners-state.ts";
 import type {Car, EngineCarState} from "../types/types.ts";
 import {animateCar} from "../utils/animation.ts";
 
 const runningAnimations = new Map<number, () => void>();
+
+interface RaceParticipant {
+    car: Car;
+    lane: HTMLElement;
+    vehicle: HTMLElement;
+}
 
 interface GarageRenderProperties {
     engineState: Record<number, EngineCarState>;
@@ -31,6 +39,8 @@ interface GarageRenderProperties {
     onUpdate: (name: string, color: string) => void;
     onStart: (car: Car, lane: HTMLElement, vehicle: HTMLElement) => void;
     onStop: (car: Car, vehicle: HTMLElement) => void;
+    onRaceStart: (message: HTMLElement) => void;
+    onResetRace: (message: HTMLElement) => void;
 }
 
 const createCreateForm = (onCreate: (name: string, color: string) => void): HTMLFormElement => {
@@ -88,6 +98,55 @@ const createGarageInfo = (): HTMLElement => {
     return info;
 };
 
+const createRaceControls = (
+    startDisabled: boolean,
+    resetDisabled: boolean,
+    onRaceStart: (message: HTMLElement) => void,
+    onResetRace: (message: HTMLElement) => void,
+): HTMLDivElement => {
+    const controls = document.createElement("div");
+
+    controls.classList.add(
+        "race-controls",
+        "flex",
+        "items-center",
+        "gap-2",
+        "flex-wrap",
+    );
+
+    const startRaceButton = createButton({
+        text: "Start Race",
+        disabled: startDisabled,
+    });
+    const resetRaceButton = createButton({
+        text: "Reset Race",
+        disabled: resetDisabled,
+    });
+
+    startRaceButton.classList.add("race-controls__start");
+    resetRaceButton.classList.add("race-controls__reset");
+
+    const message = document.createElement("p");
+
+    message.classList.add("race-controls__message", "text-slate-300");
+
+    startRaceButton.addEventListener("click", () => {
+        startRaceButton.disabled = true;
+        resetRaceButton.disabled = false;
+        onRaceStart(message);
+    });
+
+    resetRaceButton.addEventListener("click", () => {
+        startRaceButton.disabled = false;
+        resetRaceButton.disabled = true;
+        onResetRace(message);
+    });
+
+    controls.append(startRaceButton, resetRaceButton, message);
+
+    return controls;
+};
+
 const renderGarage = ({
     engineState,
     onCreate,
@@ -98,6 +157,8 @@ const renderGarage = ({
     onUpdate,
     onStart,
     onStop,
+    onRaceStart,
+    onResetRace,
 }: GarageRenderProperties): HTMLElement => {
     const container = document.createElement("div");
 
@@ -106,6 +167,11 @@ const renderGarage = ({
     heading.textContent = "Garage Page";
 
     const totalPages = Math.max(1, Math.ceil(garageState.totalCount / GARAGE_LIMIT));
+    const hasRunningCar = garageState.cars.some((car) => getEngineState(car.id) !== "idle");
+    const startRaceDisabled = garageState.cars.length === 0 || hasRunningCar;
+    const resetRaceDisabled = !hasRunningCar;
+
+    const raceControls = createRaceControls(startRaceDisabled, resetRaceDisabled, onRaceStart, onResetRace);
 
     container.append(
         heading,
@@ -113,6 +179,7 @@ const renderGarage = ({
         createCreateForm(onCreate),
         createUpdateForm(onUpdate),
         createGenerateButton(onGenerate),
+        raceControls,
         createCarList({
             cars: garageState.cars,
             selectedCarId: garageState.selectedCarId,
@@ -191,6 +258,90 @@ const runCarStop = async (
     }
 };
 
+const getRaceParticipants = (page: HTMLElement): RaceParticipant[] => {
+    const lanes = [...page.querySelectorAll<HTMLElement>(".car-card__lane")];
+    const vehicles = [...page.querySelectorAll<HTMLElement>(".car-card__vehicle")];
+
+    return garageState.cars
+        .map((car, index) => {
+            const lane = lanes[index];
+            const vehicle = vehicles[index];
+
+            if (lane === undefined || vehicle === undefined) {
+                return null;
+            }
+
+            return {car, lane, vehicle};
+        })
+        .filter((participant): participant is RaceParticipant => participant !== null);
+};
+
+const saveRaceWinner = (carId: number, seconds: number): void => {
+    void saveWinner(carId, seconds).catch(() => {
+        // The winner message is already shown; persistence is best-effort.
+    });
+};
+
+const runRace = async (page: HTMLElement, message: HTMLElement): Promise<void> => {
+    const participants = getRaceParticipants(page);
+    let winnerName: string | null = null;
+
+    message.textContent = "";
+
+    const announceWinner = (car: Car, durationMs: number): void => {
+        if (winnerName !== null) {
+            return;
+        }
+
+        winnerName = car.name;
+
+        const seconds = durationMs / MILLISECONDS_PER_SECOND;
+
+        message.textContent = `${car.name} won! Time: ${seconds.toFixed(2)}s`;
+
+        saveRaceWinner(car.id, seconds);
+    };
+
+    const runs = participants.map(async ({car, lane, vehicle}) => {
+        try {
+            const engine = await startCarEngine(car.id);
+            const durationMs = engine.distance / engine.velocity;
+            const cancelAnimation = animateCar(lane, vehicle, durationMs, () => {
+                runningAnimations.delete(car.id);
+                markEngineFinished(car.id);
+                announceWinner(car, durationMs);
+            });
+
+            runningAnimations.set(car.id, cancelAnimation);
+
+            const isDriving = await driveCarEngine(car.id);
+
+            if (!isDriving) {
+                cancelAnimation();
+                runningAnimations.delete(car.id);
+            }
+        } catch {
+            runningAnimations.delete(car.id);
+        }
+    });
+
+    await Promise.all(runs);
+};
+
+const resetRace = async (page: HTMLElement, message: HTMLElement): Promise<void> => {
+    for (const cancelAnimation of runningAnimations.values()) {
+        cancelAnimation();
+    }
+
+    runningAnimations.clear();
+
+    message.textContent = "";
+
+    await Promise.allSettled(garageState.cars.map((car) => stopCarEngine(car.id)));
+
+    renderGaragePage(page);
+};
+
 const renderGaragePage = (page: HTMLElement): void => {
     page.replaceChildren(renderGarage({
         engineState: garageState.engineState,
@@ -219,6 +370,12 @@ const renderGaragePage = (page: HTMLElement): void => {
         },
         onStop: (car, vehicle) => {
             void runCarStop(page, car, vehicle);
+        },
+        onRaceStart: (message) => {
+            void runRace(page, message);
+        },
+        onResetRace: (message) => {
+            void resetRace(page, message);
         },
     }));
 };
