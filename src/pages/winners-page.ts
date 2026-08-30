@@ -182,6 +182,11 @@ const renderWinnersPage = async (page: HTMLElement): Promise<void> => {
         void handleSort(page, field);
     });
 
+    const tableWrapper = document.createElement("div");
+
+    tableWrapper.classList.add("w-full", "overflow-x-auto");
+    tableWrapper.append(table);
+
     const pagination = createPagination({
         currentPage: winnersState.currentPage,
         totalPages,
@@ -190,7 +195,7 @@ const renderWinnersPage = async (page: HTMLElement): Promise<void> => {
         },
     });
 
-    container.append(heading, createWinnersInfo(), table, pagination);
+    container.append(heading, createWinnersInfo(), tableWrapper, pagination);
     page.replaceChildren(container);
 
     const rows = await loadRowData(winnersState.winners);
