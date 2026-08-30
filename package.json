@@ -1,0 +1,27 @@
+{
+  "name": "async-race",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run typecheck && npm run lint && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "eslint": "^10.8.0",
+    "eslint-plugin-unicorn": "^65.0.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~6.0.2",
+    "typescript-eslint": "^8.65.0",
+    "vite": "^8.2.0"
+  }
+}
