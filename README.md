@@ -2,6 +2,8 @@
 
 Single Page Application for drag-racing radio-controlled cars. Built with vanilla TypeScript, Vite and the native DOM API — no UI frameworks.
 
+> **Important:** this app is a frontend for the [async-race-api](https://github.com/mikhama/async-race-api) mock server. All data (cars, engines, winners) comes from the server — it must be running locally on `http://127.0.0.1:3000`, both during development and when testing the [deployed site](#deployment).
+
 ## Features
 
 - **Garage view** — car CRUD (create / update / delete / list), RGB color picker, pagination (7 cars per page), random generation of 100 cars per click
@@ -44,6 +46,16 @@ cp .env.example .env # set VITE_API_URL=http://127.0.0.1:3000
 npm run dev          # http://localhost:5173
 ```
 
+## Mock server
+
+The [async-race-api](https://github.com/mikhama/async-race-api) server provides:
+
+- `GET /garage`, `POST /garage`, `PUT /garage/:id`, `DELETE /garage/:id` — car CRUD; pagination via `_page` / `_limit`, total count in the `X-Total-Count` header
+- `PATCH /engine?id=<carId>&status=started|stopped|drive` — engine control; a `500` response on `drive` means the engine broke down and the car stops in place (by design, roughly 1 in 3 drive requests fails); occasional `404` / `429` responses when buttons are spammed are also by design and are not bugs
+- `GET /winners`, `POST /winners`, `PUT /winners/:id`, `DELETE /winners/:id` — winners table; sorting via `_sort` / `_order`
+
+The server URL is configured via `VITE_API_URL` (see `.env.example`) and defaults to `http://127.0.0.1:3000`.
+
 ## Scripts
 
 | Command            | Description                        |
@@ -69,9 +81,13 @@ src/
 
 ## Deployment
 
+Live demo: https://alexander-domanov.github.io/async-race/
+
 The app is configured for GitHub Pages (`base: '/async-race/'` in `vite.config.ts`):
 
 ```bash
 npm run build
 npx gh-pages -d dist
 ```
+
+**Note:** the deployed site is a static frontend — to see any data, run the mock server locally (`npm start` in the async-race-api repo) and open the deployed URL in the browser of the same machine. The browser connects to `http://127.0.0.1:3000` on the machine where it runs, so a reviewer just starts the server on their own machine.
