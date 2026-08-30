@@ -35,7 +35,10 @@ const createWinnersInfo = (): HTMLElement => {
     const info = document.createElement("p");
 
     info.classList.add("text-slate-400");
-    info.textContent = `Page ${winnersState.currentPage}, Total Records: ${winnersState.totalCount}`;
+
+    const totalPages = Math.max(1, Math.ceil(winnersState.totalCount / WINNERS_LIMIT));
+
+    info.textContent = `Page ${winnersState.currentPage} of ${totalPages}, Total Records: ${winnersState.totalCount}`;
 
     return info;
 };
@@ -151,8 +154,24 @@ const handlePageChange = (page: HTMLElement, nextPage: number): void => {
     });
 };
 
+const createEmptyWinnersRow = (): HTMLTableRowElement => {
+    const emptyRow = document.createElement("tr");
+    const emptyCell = document.createElement("td");
+
+    emptyCell.colSpan = 5;
+    emptyCell.classList.add("text-slate-500");
+    emptyCell.textContent = "No winners yet. Run a race!";
+
+    emptyRow.append(emptyCell);
+
+    return emptyRow;
+};
+
 const renderWinnersPage = async (page: HTMLElement): Promise<void> => {
     const container = document.createElement("div");
+
+    container.classList.add("flex", "flex-col", "gap-4");
+
     const heading = document.createElement("h2");
 
     heading.textContent = "Winners Page";
@@ -176,7 +195,11 @@ const renderWinnersPage = async (page: HTMLElement): Promise<void> => {
 
     const rows = await loadRowData(winnersState.winners);
 
-    body.append(...rows.map((row) => createTableRow(row)));
+    if (rows.length === 0) {
+        body.append(createEmptyWinnersRow());
+    } else {
+        body.append(...rows.map((row) => createTableRow(row)));
+    }
 };
 
 export const createWinnersPage = (): HTMLElement => {

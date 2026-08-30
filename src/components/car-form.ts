@@ -15,6 +15,7 @@ const createNameInput = (value: string): HTMLInputElement => {
 
     nameInput.type = "text";
     nameInput.placeholder = "Car name";
+    nameInput.setAttribute("aria-label", "Car name");
     nameInput.value = value;
 
     return nameInput;
@@ -24,6 +25,7 @@ const createColorInput = (value: string): HTMLInputElement => {
     const colorInput = document.createElement("input");
 
     colorInput.type = "color";
+    colorInput.setAttribute("aria-label", "Car color");
     colorInput.value = value;
 
     return colorInput;

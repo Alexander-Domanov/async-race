@@ -86,29 +86,45 @@ export const applyGenerateCars = async (): Promise<void> => {
     await loadGarage();
 };
 
+let engineGeneration = 0;
+
+export const getEngineGeneration = (): number => engineGeneration;
+
+export const invalidateEngineGeneration = (): void => {
+    engineGeneration += 1;
+};
+
 export const getEngineState = (carId: number): EngineCarState => {
     return garageState.engineState[carId] ?? "idle";
 };
 
 export const startCarEngine = async (carId: number): Promise<EngineResponse> => {
+    const generation = getEngineGeneration();
     const engine = await startEngine(carId);
 
-    garageState.engineState[carId] = "driving";
+    if (generation === getEngineGeneration()) {
+        garageState.engineState[carId] = "driving";
+    }
 
     return engine;
 };
 
 export const stopCarEngine = async (carId: number): Promise<void> => {
+    const generation = getEngineGeneration();
+
     await stopEngine(carId);
 
-    garageState.engineState[carId] = "idle";
+    if (generation === getEngineGeneration()) {
+        garageState.engineState[carId] = "idle";
+    }
 };
 
 export const driveCarEngine = async (carId: number): Promise<boolean> => {
+    const generation = getEngineGeneration();
     const result = await driveEngine(carId);
 
     if (result.status === "failed") {
-        if (garageState.engineState[carId] === "driving") {
+        if (generation === getEngineGeneration() && garageState.engineState[carId] === "driving") {
             garageState.engineState[carId] = "broken";
         }
 

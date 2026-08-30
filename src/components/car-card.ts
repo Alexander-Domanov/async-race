@@ -184,6 +184,10 @@ const createRaceRow = (
     const {lane, vehicle} = createRaceLane(car.color);
     const engineControls = createEngineControls(car, engineState, lane, vehicle, onStart, onStop);
 
+    if (engineState === "broken") {
+        vehicle.classList.add("car-card__vehicle--broken");
+    }
+
     row.append(engineControls, lane);
 
     return row;
@@ -208,6 +212,9 @@ export const createCarCard = ({
         "border-slate-700",
         "bg-slate-900",
         "p-4",
+        "flex",
+        "flex-col",
+        "gap-4",
     );
 
     if (isSelected) {

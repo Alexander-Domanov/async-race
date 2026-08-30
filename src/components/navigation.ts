@@ -1,11 +1,11 @@
 import {createButton} from "./button.ts";
+import {getPageFromHash, navigate} from "../router/router.ts";
 import type {Page} from "../types/types.ts";
 
-export const createNavigation = (
-    onNavigate: (page: Page) => void,
-    initialPage: Page,
-): HTMLElement => {
+export const createNavigation = (): HTMLElement => {
     const nav = document.createElement("nav");
+
+    nav.classList.add("flex", "items-center", "gap-2");
 
     const garageButton = createButton({text: "Garage"});
     const winnersButton = createButton({text: "Winners"});
@@ -16,16 +16,18 @@ export const createNavigation = (
     };
 
     garageButton.addEventListener("click", () => {
-        setActivePage("garage");
-        onNavigate("garage");
+        navigate("garage");
     });
 
     winnersButton.addEventListener("click", () => {
-        setActivePage("winners");
-        onNavigate("winners");
+        navigate("winners");
     });
 
-    setActivePage(initialPage);
+    globalThis.addEventListener("hashchange", () => {
+        setActivePage(getPageFromHash());
+    });
+
+    setActivePage(getPageFromHash());
 
     nav.append(garageButton, winnersButton);
 
