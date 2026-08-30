@@ -45,6 +45,28 @@ const createManagementControls = (
     return controls;
 };
 
+const createStartButton = (engineState: EngineCarState): HTMLButtonElement => {
+    const startButton = createButton({
+        text: "Start",
+        disabled: engineState !== "idle",
+    });
+
+    startButton.classList.add("car-card__start");
+
+    return startButton;
+};
+
+const createStopButton = (engineState: EngineCarState): HTMLButtonElement => {
+    const stopButton = createButton({
+        text: "Stop",
+        disabled: engineState === "idle",
+    });
+
+    stopButton.classList.add("car-card__stop");
+
+    return stopButton;
+};
+
 const createEngineControls = (
     car: Car,
     engineState: EngineCarState,
@@ -62,17 +84,8 @@ const createEngineControls = (
         "gap-2",
     );
 
-    const startButton = createButton({
-        text: "Start",
-        disabled: engineState !== "idle",
-    });
-    const stopButton = createButton({
-        text: "Stop",
-        disabled: engineState === "idle",
-    });
-
-    startButton.classList.add("car-card__start");
-    stopButton.classList.add("car-card__stop");
+    const startButton = createStartButton(engineState);
+    const stopButton = createStopButton(engineState);
 
     startButton.addEventListener("click", () => {
         startButton.disabled = true;
